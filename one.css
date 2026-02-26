@@ -13,7 +13,7 @@
             --gradient-brand: linear-gradient(135deg, #3D7FFF, #6299FF);
             --red: #EF5350;
             --radius-md: 18px;
-            --radius-lg: 12px;
+            --radius-lg: 24px;
             --radius-pill: 50px;
             --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
             --transition-smooth: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -62,27 +62,11 @@
 
         .main-container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
 
-/* Fix for Shaka Fullscreen Alignment */
-.shaka-video-container {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-/* Force video to center and fill screen correctly in fullscreen mode */
-#playerContainer:fullscreen video {
-    object-fit: contain !important;
-}
-
-#playerContainer:-webkit-full-screen video {
-    object-fit: contain !important;
-}
-
-/* Ensure the UI controls stay on top and span the width */
-.shaka-controls-container {
-    width: 100% !important;
-}
-
-
+        .player-card {
+            background: #000; border-radius: var(--radius-lg); overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-glass);
+            position: relative; aspect-ratio: 16/9; margin-bottom: 25px;
+        }
         #playerContainer, #iframePlayer { width: 100%; height: 100%; border: none; }
         .hidden { display: none !important; }
 
