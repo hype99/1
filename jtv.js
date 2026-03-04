@@ -1,6 +1,4 @@
-(function(){
-      // 1. Sandbox Check
-      function isSandboxedEnv(){
+function isSandboxedEnv(){
         try {
           if (window.self === window.top) return false;
           if (window.frameElement && window.frameElement.hasAttribute("sandbox")) return true;
@@ -99,4 +97,3 @@
 
         video.addEventListener("play", () => { video.muted = false; });
       });
-    })();
