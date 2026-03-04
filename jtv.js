@@ -1,99 +1,76 @@
-async function initPlayer() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const channelId = urlParams.get('id'); 
+(function(){
+      document.addEventListener("DOMContentLoaded", async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const channelId = urlParams.get('id');
+        const apiUrl = "https://misty-feather-bb3c.pakivac483-abf.workers.dev/";
 
-            if (!channelId) {
-                showError("Invalid Request", "Please provide a channel ID in the URL (e.g., ?id=1HD)");
-                return;
+        if(!channelId) return;
+
+        shaka.polyfill.installAll();
+        const video = document.getElementById("video");
+        const container = document.getElementById("player-container");
+        
+        const player = new shaka.Player(video);
+        const ui = new shaka.ui.Overlay(player, container, video);
+
+        // White Seekbar and Control Panel
+        ui.configure({
+            controlPanelElements: ["mute", "play_pause", "time_and_duration", "spacer", "quality", "picture_in_picture", "fullscreen"],
+            seekBarColors: {
+                base: "rgba(255, 255, 255, 0.3)",
+                buffered: "rgba(255, 255, 255, 0.5)",
+                played: "rgb(255, 255, 255)"
             }
+        });
 
-            try {
-                // Fetching your Worker API
-                const response = await fetch('https://misty-feather-bb3c.pakivac483-abf.workers.dev/');
-                if (!response.ok) throw new Error('Failed to fetch channel data');
+        try {
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+          const channelData = data.find(c => c.name === channelId);
+
+          if (!channelData) return;
+
+          // Extract token from mpd_url
+          const tokenValue = channelData.mpd_url.split('?')[1] || "";
+
+          // DRM Setup
+          if (channelData.license_key) {
+            const [kId, k] = channelData.license_key.split(':');
+            player.configure({
+              drm: { clearKeys: { [kId.trim()]: k.trim() } }
+            });
+          }
+
+          player.configure({
+            manifest: { defaultPresentationDelay: 5 },
+            streaming: { lowLatencyMode: true, bufferingGoal: 10 }
+          });
+
+          // Networking Filter
+          player.getNetworkingEngine().registerRequestFilter((type, request) => {
+            request.headers["Referer"] = "https://www.jiotv.com/";
+            request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+            
+            if (tokenValue) {
+                request.headers["Cookie"] = tokenValue;
+
+                const isVideoData = type === shaka.net.NetworkingEngine.RequestType.MANIFEST || 
+                                    type === shaka.net.NetworkingEngine.RequestType.SEGMENT;
                 
-                const channels = await response.json();
-                const channelData = channels.find(c => c.name === channelId);
-
-                if (!channelData) {
-                    showError("Not Found", `Channel "${channelId}" was not found in the API.`);
-                    return;
+                if (isVideoData && !request.uris[0].includes("__hdnea__")) {
+                    const sep = request.uris[0].includes("?") ? "&" : "?";
+                    request.uris[0] += sep + tokenValue;
                 }
-
-                const video = document.getElementById('video');
-                const ui = video['ui'];
-                const controls = ui.getControls();
-                const player = controls.getPlayer();
-
-                // UI Configuration - Added "picture_in_picture" to controlPanelElements
-                ui.configure({
-                    controlPanelElements: [
-                        "play_pause", 
-                        "time_and_duration", 
-                        "spacer", 
-                        "mute", 
-                        "volume", 
-                        "quality", 
-                        "picture_in_picture", // PiP Option Added Here
-                        "fullscreen"
-                    ],
-                    addSeekBar: true
-                });
-
-                // DRM Setup
-                if (channelData.license_key) {
-                    const [keyId, key] = channelData.license_key.split(':');
-                    player.configure({
-                        drm: {
-                            clearKeys: { [keyId.trim()]: key.trim() }
-                        }
-                    });
-                }
-
-                // Header and Token Handling
-                const token = channelData.mpd_url.split('?')[1] || "";
-
-                player.getNetworkingEngine().registerRequestFilter((type, request) => {
-                    request.headers['Referer'] = 'https://www.jiotv.com/';
-                    request.headers['User-Agent'] = "iasked";
-                    
-                    if (token) {
-                        request.headers['Cookie'] = token;
-                        if (!request.uris[0].includes('__hdnea__')) {
-                            const separator = request.uris[0].includes('?') ? '&' : '?';
-                            request.uris[0] += separator + token;
-                        }
-                    }
-                });
-
-                // Error handling
-                player.addEventListener('error', (event) => {
-                    if (event.detail.code === 4003) {
-                        console.error("DRM Key Error");
-                    }
-                });
-
-                await player.load(channelData.mpd_url);
-                console.log("Stream loaded successfully!");
-
-            } catch (error) {
-                console.error("Main Error:", error);
-                showError("Stream Error", "The channel is currently unavailable or the link has expired.");
             }
+          });
+
+          await player.load(channelData.mpd_url);
+          video.play().catch(() => { video.muted = true; video.play(); });
+
+        } catch (err) {
+          console.error("Stream Error:", err);
         }
 
-        function showError(title, message) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.innerHTML = `
-                <div class="error-card">
-                    <h2>${title}</h2>
-                    <p>${message}</p>
-                    <a href="https://t.me/+89_DpZx6uUs2Mjk9" class="telegram-button">Join Support</a>
-                </div>
-            `;
-            errorDiv.style.display = 'block';
-            document.getElementById('video-container').style.display = 'none';
-        }
-
-        // Initialize when UI is ready
-        document.addEventListener('shaka-ui-loaded', initPlayer);
+        video.addEventListener("play", () => { video.muted = false; });
+      });
+    })();
