@@ -55,7 +55,7 @@ async function initPlayer() {
 
                 player.getNetworkingEngine().registerRequestFilter((type, request) => {
                     request.headers['Referer'] = 'https://www.jiotv.com/';
-                    request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+                    request.headers['User-Agent'] = "iasked";
                     
                     if (token) {
                         request.headers['Cookie'] = token;
