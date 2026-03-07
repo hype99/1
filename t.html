@@ -1,205 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <title>@Cricinsider365 – Player</title>
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{background:#000;width:100%;height:100%;font-family:system-ui,sans-serif;color:#fff}
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+    /* ── Quality Picker Overlay ── */
+    #quality-screen{
+      position:fixed;inset:0;
+      background:linear-gradient(135deg,#0a0f1c 0%,#131d2f 100%);
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      z-index:9999;padding:20px;
+    }
+    #quality-screen.hidden{display:none}
 
-<title>@Cricinsider365</title>
+    .qs-header{
+      text-align:center;margin-bottom:32px;
+    }
+    .qs-logo{
+      display:inline-flex;align-items:center;gap:10px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(59,130,246,.3);
+      padding:10px 24px;border-radius:50px;
+      font-size:18px;font-weight:900;letter-spacing:.5px;
+      margin-bottom:16px;
+    }
+    .qs-title{
+      font-size:15px;font-weight:700;color:#e2e8f0;
+      max-width:320px;line-height:1.4;
+    }
+    .qs-tournament{
+      font-size:11px;color:#64748b;
+      text-transform:uppercase;letter-spacing:2px;
+      margin-top:4px;
+    }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.compiled.js"></script>
+    .qs-list{
+      width:100%;max-width:340px;
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .qs-btn{
+      background:#131d2f;
+      border:1px solid #253247;
+      border-radius:16px;
+      padding:16px 20px;
+      display:flex;align-items:center;justify-content:space-between;
+      cursor:pointer;
+      transition:.25s;
+      font-size:15px;font-weight:700;
+    }
+    .qs-btn:hover{
+      background:#1e3a5f;
+      border-color:#3b82f6;
+      transform:translateX(4px);
+    }
+    .qs-btn .badge{
+      background:#2563eb;
+      font-size:10px;font-weight:800;
+      padding:3px 10px;border-radius:20px;
+      letter-spacing:.5px;
+    }
+    .qs-btn .badge.hd{background:#16a34a}
+    .qs-btn .badge.fhd{background:#9333ea}
 
-<style>
+    .qs-loading{
+      text-align:center;color:#64748b;
+      font-size:14px;margin-top:20px;
+    }
+    .qs-error{
+      color:#ef4444;text-align:center;
+      font-size:14px;max-width:320px;
+    }
 
-body{
-margin:0;
-background:#000;
-font-family:system-ui;
-color:white;
-}
+    /* ── Video Player ── */
+    #player-screen{
+      position:fixed;inset:0;
+      background:#000;
+      display:none;
+    }
+    #player-screen.visible{display:block}
 
-.player-container{
-position:relative;
-width:100%;
-height:100vh;
-background:#000;
-}
+    .video-container{
+      position:absolute;width:100%;height:100%;
+      background:#000;overflow:hidden;
+    }
+    .shaka-video-container{
+      position:absolute;width:100%;height:100%;
+    }
+    video{width:100%;height:100%;background:#000}
 
-video{
-width:100%;
-height:100%;
-}
+    #myLogo{
+      width:60px;height:40px;
+      position:absolute;right:5px;top:10px;
+      z-index:100;opacity:.8;
+    }
 
-.logo{
-position:absolute;
-top:15px;
-right:15px;
-width:70px;
-opacity:.8;
-z-index:10;
-}
+    /* Back button */
+    #back-btn{
+      position:absolute;top:16px;left:16px;
+      z-index:500;
+      background:rgba(0,0,0,.7);
+      border:1px solid rgba(255,255,255,.2);
+      color:#fff;
+      padding:8px 18px;border-radius:30px;
+      font-size:13px;font-weight:700;
+      cursor:pointer;display:none;
+      align-items:center;gap:6px;
+      transition:.2s;
+    }
+    #back-btn:hover{background:rgba(37,99,235,.8)}
+    #back-btn.visible{display:flex}
 
-.quality-bar{
-position:absolute;
-top:15px;
-left:50%;
-transform:translateX(-50%);
-display:flex;
-gap:8px;
-background:rgba(0,0,0,.7);
-padding:8px 12px;
-border-radius:30px;
-z-index:20;
-}
-
-.qbtn{
-background:#111;
-border:1px solid #333;
-color:white;
-padding:6px 12px;
-border-radius:20px;
-font-size:12px;
-cursor:pointer;
-}
-
-.qbtn.active{
-background:red;
-}
-
-.loader{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#111;
-padding:12px 20px;
-border-radius:20px;
-}
-
-</style>
+    /* Shaka theme */
+    @font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Me5Q.ttf) format('truetype')}
+    @font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9vAw.ttf) format('truetype')}
+    .youtube-theme{font-family:'Roboto',sans-serif}
+    .youtube-theme .shaka-bottom-controls{width:100%;padding:0;padding-bottom:0;z-index:1;display:flex;flex-direction:column}
+    .youtube-theme .shaka-ad-controls{order:1}
+    .youtube-theme .shaka-controls-button-panel{order:2;height:60px;padding:0 10px}
+    .youtube-theme .shaka-range-container{margin:4px 10px;top:0}
+    .youtube-theme .shaka-small-play-button{order:-3}
+    .youtube-theme .shaka-mute-button{order:-2}
+    .youtube-theme .shaka-controls-button-panel>*{margin:0;padding:3px 8px;color:#EEE;height:60px}
+    .youtube-theme .shaka-controls-button-panel>*:focus{outline:none;box-shadow:inset 0 0 0 2px rgba(27,127,204,.8);color:#FFF}
+    .youtube-theme .shaka-controls-button-panel>*:hover{color:#FFF}
+    .youtube-theme .shaka-controls-button-panel .shaka-volume-bar-container{position:relative;z-index:10;left:-1px;order:-1;opacity:0;width:0;transition:width .2s cubic-bezier(.4,0,1,1);height:3px;padding:0}
+    .youtube-theme .shaka-controls-button-panel .shaka-volume-bar-container:hover,.youtube-theme .shaka-controls-button-panel .shaka-volume-bar-container:focus{display:block;width:50px;opacity:1;padding:0 6px}
+    .youtube-theme .shaka-mute-button:hover+div{opacity:1;width:50px;padding:0 6px}
+    .youtube-theme .shaka-current-time{padding:0 10px;font-size:12px}
+    .youtube-theme .shaka-seek-bar-container{height:3px;position:relative;top:-1px;border-radius:0;margin-bottom:0}
+    .youtube-theme .shaka-seek-bar-container .shaka-range-element{opacity:0}
+    .youtube-theme .shaka-seek-bar-container:hover{height:5px;top:0;cursor:pointer}
+    .youtube-theme .shaka-seek-bar-container:hover .shaka-range-element{opacity:1;cursor:pointer}
+    .youtube-theme .shaka-seek-bar-container input[type=range]::-webkit-slider-thumb{background:#FF0000;cursor:pointer}
+    .youtube-theme .shaka-seek-bar-container input[type=range]::-moz-range-thumb{background:#FF0000;cursor:pointer}
+    .youtube-theme .shaka-overflow-menu,.youtube-theme .shaka-settings-menu{border-radius:2px;background:rgba(28,28,28,.9);transition:opacity .1s;right:10px;bottom:50px;padding:8px 0;min-width:200px}
+    .youtube-theme .shaka-settings-menu{padding:0 0 8px 0}
+    .youtube-theme .shaka-settings-menu button{font-size:12px}
+    .youtube-theme .shaka-settings-menu button span{margin-left:33px;font-size:13px}
+    .youtube-theme .shaka-settings-menu button[aria-selected=true]{display:flex}
+    .youtube-theme .shaka-settings-menu button[aria-selected=true] span{order:2;margin-left:0}
+    .youtube-theme .shaka-settings-menu button[aria-selected=true] i{order:1;font-size:18px;padding-left:5px}
+    .youtube-theme .shaka-overflow-menu button{padding:0}
+    .youtube-theme .shaka-overflow-menu button i{display:none}
+    .youtube-theme .shaka-overflow-menu button .shaka-overflow-button-label{display:flex;justify-content:space-between;flex-direction:row;align-items:center;cursor:default;outline:none;height:60px;flex:0 0 100%}
+    .youtube-theme .shaka-overflow-menu button .shaka-overflow-button-label span{flex-shrink:initial;padding-left:15px;font-size:13px;font-weight:500;display:flex;align-items:center}
+    .youtube-theme .shaka-overflow-menu span+span{color:#FFF;font-weight:400!important;font-size:12px!important;padding-right:8px;padding-left:0!important}
+    .youtube-theme .shaka-overflow-menu span+span:after{content:"navigate_next";font-family:'Material Icons Sharp';font-size:20px}
+    .youtube-theme .shaka-overflow-menu .shaka-pip-button span+span{padding-right:15px!important}
+    .youtube-theme .shaka-overflow-menu .shaka-pip-button span+span:after{content:""}
+    .youtube-theme .shaka-back-to-overflow-button{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.2);font-size:12px;color:#eee;height:60px}
+    .youtube-theme .shaka-back-to-overflow-button .material-icons-round{font-size:15px;padding-right:10px}
+    .youtube-theme .shaka-back-to-overflow-button span{margin-left:3px!important}
+    .youtube-theme .shaka-overflow-menu button:hover,.youtube-theme .shaka-settings-menu button:hover{background-color:rgba(255,255,255,.1);cursor:pointer}
+    .youtube-theme .shaka-overflow-menu button:focus,.youtube-theme .shaka-settings-menu button:focus{background-color:rgba(255,255,255,.1);border:none;outline:none}
+    .youtube-theme .shaka-overflow-menu button,.youtube-theme .shaka-settings-menu button{color:#EEE}
+    .youtube-theme .shaka-overflow-menu-button{font-size:18px;margin-right:5px}
+    .youtube-theme .shaka-fullscreen-button:hover{font-size:25px;transition:font-size .1s}
+    .shaka-spinner-container,.shaka-spinner,.shaka-spinner-svg{display:none!important;visibility:hidden!important;opacity:0!important}
+    .youtube-theme .shaka-seek-bar{background:rgba(255,255,255,.2)!important}
+    .youtube-theme .shaka-buffered-range{background:rgba(255,255,255,.4)!important}
+    .youtube-theme .shaka-played-range{background:rgb(255,0,0)!important}
+  </style>
 </head>
-
 <body>
 
-<div class="player-container">
+  <!-- Quality Selection Screen -->
+  <div id="quality-screen">
+    <div class="qs-header">
+      <div class="qs-logo">
+        ⚡ FANCODE
+      </div>
+      <div id="match-title" class="qs-title">Loading match...</div>
+      <div id="match-tournament" class="qs-tournament"></div>
+    </div>
 
-<div id="qualities" class="quality-bar"></div>
+    <div id="quality-list" class="qs-list">
+      <div class="qs-loading">⏳ Fetching stream data...</div>
+    </div>
+  </div>
 
-<div id="loader" class="loader">Loading stream...</div>
-
-<video id="video" autoplay muted playsinline></video>
-
-<img class="logo" src="https://i.postimg.cc/fRSw4ZRD/IMG-20250925-223757.jpg">
-
-</div>
+  <!-- Video Player Screen -->
+  <div id="player-screen">
+    <div class="video-container">
+      <div class="shaka-video-container youtube-theme" data-shaka-player>
+        <video id="video" autoplay muted playsinline preload="auto"></video>
+        <img id="myLogo" src="https://i.postimg.cc/fRSw4ZRD/IMG-20250925-223757.jpg">
+      </div>
+    </div>
+    <button id="back-btn" onclick="showQualityScreen()">← Quality</button>
+  </div>
 
 <script>
+const DATA_URL = "https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
 
-const API="https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
+const params = new URLSearchParams(window.location.search);
+const matchId = parseInt(params.get("id"));
 
-const params=new URLSearchParams(location.search);
-const matchId=params.get("id");
+let player = null;
+const video = document.getElementById("video");
 
-const video=document.getElementById("video");
-const qualities=document.getElementById("qualities");
-const loader=document.getElementById("loader");
-
-let player;
-
-async function init(){
-
-const res=await fetch(API);
-const data=await res.json();
-
-const match=data.matches.find(m=>m.match_id==matchId);
-
-if(!match){
-loader.innerText="Stream not found";
-return;
+// ── Quality badge helper ──
+function qualityBadge(res) {
+  if (res >= 1080) return `<span class="badge fhd">${res}p</span>`;
+  if (res >= 720)  return `<span class="badge hd">${res}p</span>`;
+  return `<span class="badge">${res}p</span>`;
 }
 
-const playlist=match.auto_streams?.[0]?.auto;
-
-const lines=playlist.split("\n");
-
-let streams=[];
-
-lines.forEach((line,i)=>{
-
-if(line.includes("RESOLUTION=")){
-
-const q=line.split("RESOLUTION=")[1].split(",")[0].split("x")[1]+"p";
-
-const url=lines[i+1].trim();
-
-streams.push({q,url});
-
+// ── Parse m3u8 playlist into quality list ──
+function parseQualities(m3u8Text) {
+  const lines = m3u8Text.split("\n");
+  const qualities = [];
+  lines.forEach((line, i) => {
+    if (line.includes("RESOLUTION=")) {
+      const height = parseInt(line.split("RESOLUTION=")[1].split(",")[0].split("x")[1]);
+      const fps = line.includes("FRAME-RATE=50") ? "50fps" : "25fps";
+      const url = (lines[i + 1] || "").trim();
+      if (url) qualities.push({ height, fps, url });
+    }
+  });
+  // Sort highest first
+  return qualities.sort((a, b) => b.height - a.height);
 }
 
-});
+// ── Render quality buttons ──
+function renderQualities(qualities, matchData) {
+  const list = document.getElementById("quality-list");
+  list.innerHTML = "";
 
-buildButtons(streams);
+  if (!qualities.length) {
+    list.innerHTML = `<div class="qs-error">❌ No streams available for this match.</div>`;
+    return;
+  }
 
-loadStream(streams[0].url);
-
+  qualities.forEach(q => {
+    const btn = document.createElement("div");
+    btn.className = "qs-btn";
+    const label = q.height >= 1080 ? `Full HD ${q.fps === "50fps" ? "· 50fps" : ""}`.trim() 
+                : q.height >= 720  ? "HD"
+                : q.height >= 480  ? "SD"
+                : "Low";
+    btn.innerHTML = `
+      <span>▶ ${q.height}p ${q.fps === "50fps" ? "<small style='color:#94a3b8;font-weight:500'> · 50fps</small>" : ""}</span>
+      ${qualityBadge(q.height)}
+    `;
+    btn.onclick = () => startPlayer(q.url);
+    list.appendChild(btn);
+  });
 }
 
-function buildButtons(streams){
+// ── Load match from API ──
+async function loadMatch() {
+  if (!matchId) {
+    showError("No match ID provided. Please go back and select a match.");
+    return;
+  }
 
-streams.reverse().forEach((s,i)=>{
+  try {
+    const res = await fetch(DATA_URL);
+    const data = await res.json();
+    const match = (data.matches || []).find(m => m.match_id === matchId);
 
-const btn=document.createElement("div");
+    if (!match) {
+      showError(`Match ID ${matchId} not found.`);
+      return;
+    }
 
-btn.className="qbtn";
+    document.getElementById("match-title").textContent = match.title;
+    document.getElementById("match-tournament").textContent = match.tournament;
 
-btn.innerText=s.q;
+    const streamAuto = match.auto_streams?.[0]?.auto || "";
+    if (!streamAuto) {
+      showError("Stream not available for this match.");
+      return;
+    }
 
-if(i==0) btn.classList.add("active");
+    const qualities = parseQualities(streamAuto);
+    renderQualities(qualities, match);
 
-btn.onclick=()=>{
-
-document.querySelectorAll(".qbtn").forEach(b=>b.classList.remove("active"));
-
-btn.classList.add("active");
-
-loadStream(s.url);
-
-};
-
-qualities.appendChild(btn);
-
-});
-
+  } catch (err) {
+    showError("Failed to load match data. Please try again.");
+  }
 }
 
-async function loadStream(url){
-
-loader.style.display="block";
-
-if(player){
-player.destroy();
+function showError(msg) {
+  document.getElementById("match-title").textContent = "Error";
+  document.getElementById("quality-list").innerHTML = `<div class="qs-error">❌ ${msg}</div>`;
 }
 
-player=new shaka.Player(video);
+// ── Start Shaka Player ──
+async function startPlayer(streamUrl) {
+  document.getElementById("quality-screen").classList.add("hidden");
+  document.getElementById("player-screen").classList.add("visible");
+  document.getElementById("back-btn").classList.add("visible");
 
-try{
+  // Destroy existing player if any
+  if (player) {
+    await player.destroy();
+    player = null;
+  }
 
-await player.load(url);
+  try {
+    player = new shaka.Player();
+    await player.attach(video);
 
-loader.style.display="none";
+    const container = document.querySelector(".shaka-video-container");
+    const ui = new shaka.ui.Overlay(player, container, video);
 
-video.play();
+    ui.configure({
+      seekBarColors: {
+        base: "rgba(255,255,255,.2)",
+        buffered: "rgba(255,255,255,.4)",
+        played: "rgb(255,0,0)"
+      },
+      controlPanelElements: [
+        "play_pause", "mute", "time_and_duration", "restart",
+        "spacer", "quality", "language", "picture_in_picture",
+        "fullscreen", "overflow_menu"
+      ]
+    });
 
-}catch(e){
+    player.configure({
+      streaming: { bufferingGoal: 10, rebufferingGoal: 2, bufferBehind: 30 },
+      manifest: {
+        retryParameters: {
+          timeout: 30000, maxAttempts: 2,
+          baseDelay: 1000, backoffFactor: 2, fuzzFactor: 0.5
+        }
+      }
+    });
 
-loader.innerText="Stream failed";
+    video.autoplay = true;
+    video.muted = false;
+    video.volume = 1;
 
+    await player.load(streamUrl);
+
+    try {
+      await video.play();
+    } catch {
+      video.muted = true;
+      await video.play();
+    }
+
+  } catch (err) {
+    console.error("Player error:", err);
+    video.src = streamUrl;
+    video.autoplay = true;
+    try { await video.play(); } catch { video.muted = true; await video.play(); }
+  }
 }
 
+// ── Back to quality screen ──
+function showQualityScreen() {
+  if (player) { player.destroy(); player = null; }
+  document.getElementById("player-screen").classList.remove("visible");
+  document.getElementById("back-btn").classList.remove("visible");
+  document.getElementById("quality-screen").classList.remove("hidden");
 }
 
-init();
-
+// ── Boot ──
+document.addEventListener("DOMContentLoaded", loadMatch);
 </script>
 
 </body>
