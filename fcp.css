@@ -1,0 +1,55 @@
+*{margin:0;padding:0;box-sizing:border-box}
+    html,body{background:#000;width:100%;height:100%;font-family:system-ui,sans-serif;color:#fff}
+
+    #quality-screen{
+      position:fixed;inset:0;
+      background:linear-gradient(135deg,#0a0f1c 0%,#131d2f 100%);
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      z-index:9999;padding:20px;
+    }
+    #quality-screen.hidden{display:none}
+    .qs-header{text-align:center;margin-bottom:32px}
+    .qs-logo{
+      display:inline-flex;align-items:center;gap:10px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(59,130,246,.3);
+      padding:10px 24px;border-radius:50px;
+      font-size:18px;font-weight:900;letter-spacing:.5px;
+      margin-bottom:16px;
+    }
+    .qs-title{font-size:15px;font-weight:700;color:#e2e8f0;max-width:320px;line-height:1.4}
+    .qs-tournament{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+    .qs-list{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px}
+    .qs-btn{
+      background:#131d2f;border:1px solid #253247;border-radius:16px;
+      padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
+      cursor:pointer;transition:.25s;font-size:15px;font-weight:700;
+    }
+    .qs-btn:hover{background:#1e3a5f;border-color:#3b82f6;transform:translateX(4px)}
+    .qs-btn .badge{background:#2563eb;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+    .qs-btn .badge.hd{background:#16a34a}
+    .qs-btn .badge.fhd{background:#9333ea}
+    .qs-loading{text-align:center;color:#64748b;font-size:14px;margin-top:20px}
+    .qs-error{color:#ef4444;text-align:center;font-size:14px;max-width:320px}
+
+    #player-screen{position:fixed;inset:0;background:#000;display:none}
+    #player-screen.visible{display:block}
+    .video-container{position:absolute;width:100%;height:100%;background:#000;overflow:hidden}
+    .shaka-video-container{position:absolute;width:100%;height:100%}
+    video{width:100%;height:100%;background:#000}
+    #myLogo{width:60px;height:40px;position:absolute;right:5px;top:10px;z-index:100;opacity:.8}
+    #back-btn{
+      position:absolute;top:16px;left:16px;z-index:500;
+      background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.2);
+      color:#fff;padding:8px 18px;border-radius:30px;
+      font-size:13px;font-weight:700;cursor:pointer;
+      display:none;align-items:center;gap:6px;transition:.2s;
+    }
+    #back-btn:hover{background:rgba(37,99,235,.8)}
+    #back-btn.visible{display:flex}
+
+    .youtube-theme .shaka-seek-bar{background:rgba(255,255,255,.2)!important}
+    .youtube-theme .shaka-buffered-range{background:rgba(255,255,255,.4)!important}
+    .youtube-theme .shaka-played-range{background:rgb(255,0,0)!important}
+    .shaka-spinner-container,.shaka-spinner,.shaka-spinner-svg{display:none!important}
