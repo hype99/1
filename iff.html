@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>@Cricinsider365 | Live Stream</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-body: #0a0e14;
+      --bg-surface: #131820;
+      --primary: #FFD700;
+      --live-red: #ef4444;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --header-height: 60px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      margin: 0; padding: 0; 
+      background-color: var(--bg-body); 
+      font-family: 'Inter', sans-serif; 
+      color: var(--text-main);
+    }
+
+    /* --- HEADER --- */
+    header {
+      height: var(--header-height);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .logo-text { font-family: 'Poppins'; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
+
+    /* --- TICKER --- */
+    .ticker-wrap {
+      background: #161b22;
+      height: 30px; display: flex; align-items: center;
+      overflow: hidden; position: relative; border-bottom: 1px solid var(--border-subtle);
+    }
+    .ticker-content {
+      display: inline-block; white-space: nowrap;
+      animation: ticker 20s linear infinite;
+      color: #e2e8f0; font-size: 11px; padding-left: 100%;
+    }
+    @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+    /* --- PLAYER --- */
+    .player-wrapper { background: #000; width: 100%; }
+    .aspect-ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
+    .aspect-ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+    /* --- CONTENT AREA --- */
+    .container { padding: 20px 16px; max-width: 800px; margin: 0 auto; }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; font-weight: 700; }
+
+    /* Servers */
+    .server-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+    .server-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 5px;
+      text-align: center; cursor: pointer;
+      transition: 0.2s;
+    }
+    .server-card.active { border-color: var(--primary); background: rgba(255, 215, 0, 0.05); }
+    .srv-name { display: block; font-family: 'Poppins'; font-weight: 700; font-size: 11px; color: #fff; }
+    .srv-lang { font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
+
+    /* Action Buttons */
+    .btn-row { display: flex; gap: 10px; }
+    .btn-action {
+      flex: 1; background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      color: #fff; padding: 12px; border-radius: 12px; display: flex;
+      align-items: center; justify-content: center; gap: 8px; font-size: 13px;
+      cursor: pointer; text-decoration: none;
+    }
+    .btn-action i { font-size: 18px; color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-text">CRICINSIDER365</div>
+</header>
+
+<div class="ticker-wrap">
+    <div class="ticker-content">
+        WATCH HD LIVE STREAMING WITHOUT BUFFERING 🏏 JOIN TELEGRAM FOR BACKUP LINKS 📲 SHARE WITH FRIENDS 🔥
+    </div>
+</div>
+
+<div class="player-wrapper">
+    <div class="aspect-ratio">
+        <iframe id="main-player" src="https://allrounder-live.pages.dev/star/star-1-hindi" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+</div>
+
+<div class="container">
+    <div class="section-title">Select Quality</div>
+    <div class="server-grid">
+        <div class="server-card active" onclick="play(this, 'https://cricfreehd.pages.dev/4?id=1HD')">
+            <span class="srv-name">HINDI HD</span>
+            <span class="srv-lang">50 FPS</span>
+        </div>
+        <div class="server-card" onclick="play(this, 'https://allrounder-live.pages.dev/star/star-1-hindi-sd')">
+            <span class="srv-name">HINDI SD</span>
+            <span class="srv-lang">Low Data</span>
+        </div>
+        <div class="server-card" onclick="play(this, 'https://allrounder-live.pages.dev/channel/hotstar')">
+            <span class="srv-name">iOS</span>
+            <span class="srv-lang">Apple Users</span>
+        </div>
+    </div>
+
+    <div class="section-title">Actions</div>
+    <div class="btn-row">
+        <a href="https://t.me/+IhSW51QysxU3NzY1" class="btn-action">
+            <i class="material-icons">send</i> Telegram
+        </a>
+        <div class="btn-action" onclick="location.reload()">
+            <i class="material-icons">refresh</i> Refresh
+        </div>
+    </div>
+</div>
+
+<script>
+    function play(element, url) {
+        // UI Update
+        document.querySelectorAll('.server-card').forEach(c => c.classList.remove('active'));
+        element.classList.add('active');
+
+        // Player Update
+        document.getElementById('main-player').src = url;
+        
+        // Vibration feedback
+        if (navigator.vibrate) navigator.vibrate(20);
+    }
+</script>
+
+</body>
+</html>
