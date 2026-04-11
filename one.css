@@ -13,7 +13,7 @@
             --gradient-brand: linear-gradient(135deg, #3D7FFF, #6299FF);
             --red: #EF5350;
             --radius-md: 18px;
-            --radius-lg: 24px;
+            --radius-lg: 12px;
             --radius-pill: 50px;
             --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
             --transition-smooth: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
