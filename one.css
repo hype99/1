@@ -13,7 +13,7 @@
             --gradient-brand: linear-gradient(135deg, #3D7FFF, #6299FF);
             --red: #EF5350;
             --radius-md: 18px;
-            --radius-lg: 12px;
+            --radius-lg: 24px;
             --radius-pill: 50px;
             --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
             --transition-smooth: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -67,44 +67,8 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-glass);
             position: relative; aspect-ratio: 16/9; margin-bottom: 25px;
         }
-        #playerContainer, #iframePlayer, #hlsPlayerContainer {
-            width: 100%; height: 100%; border: none;
-        }
+        #playerContainer, #iframePlayer { width: 100%; height: 100%; border: none; }
         .hidden { display: none !important; }
-        
-        /* Fix Shaka player fullscreen centering issue */
-        #playerContainer .shaka-video-container {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            background: #000 !important;
-        }
-        #playerContainer video {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain !important;
-        }
-        #playerContainer .shaka-controls-container {
-            position: absolute !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-        }
-        
-        .plyr--video .plyr__controls {
-            background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-        }
-        .plyr__video-wrapper {
-            background: #000;
-        }
 
         .error-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.8);
