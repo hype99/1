@@ -111,7 +111,11 @@ function addPiPButton() {
     btn.id = "custom-pip-btn";
     btn.className = "shaka-overflow-button";
     btn.title = "Picture in Picture";
-    btn.innerHTML = "📺";
+    btn.innerHTML = `
+<svg class="shaka-pip-icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+    <path fill="currentColor"
+        d="M19 7H5v10h14V7zm0-2c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h14zm-1 7h-6v4h6v-4z"/>
+</svg>`;
 
     btn.onclick = async () => {
         try {
