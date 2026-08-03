@@ -1,3 +1,62 @@
+const CONFIG = {
+    api: "https://service-apiiiii.vercel.app/api/channel?id=",
+    tg: "https://telegram.me/CricHype"
+};
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function initApp() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (!id) {
+        window.location.href = CONFIG.tg;
+        return;
+    }
+
+    try {
+        const response = await fetch(CONFIG.api + id);
+        if (!response.ok) {
+            window.location.href = CONFIG.tg;
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.reurl && data.reurl.trim() !== "") {
+            window.location.href = data.reurl;
+            return;
+        }
+
+        if (data.ifurl && data.ifurl.trim() !== "") {
+            loadIframe(data.ifurl);
+            return;
+        }
+
+        loadShaka(data);
+
+    } catch (err) {
+        console.error("Initialization error:", err);
+        window.location.href = CONFIG.tg;
+    }
+}
+
+function loadIframe(url) {
+    const iframe = document.getElementById('iframePlayer');
+    const pc = document.getElementById('playerContainer');
+
+    iframe.src = url;
+    iframe.classList.remove('hidden');
+    pc.classList.add('hidden');
+
+    showToast("Switching to Web Player...");
+}
+
 async function loadShaka(data) {
     const container = document.getElementById('playerContainer');
     const video = document.getElementById('video');
@@ -8,25 +67,6 @@ async function loadShaka(data) {
 
     const ui = video['ui'];
     const player = ui.getControls().getPlayer();
-
-    // Configure Shaka UI
-    ui.configure({
-        controlPanelElements: [
-            'play_pause',
-            'time_and_duration',
-            'spacer',
-            'mute',
-            'volume',
-            'picture_in_picture',
-            'fullscreen',
-            'overflow_menu'
-        ],
-        overflowMenuButtons: [
-            'quality',
-            'language',
-            'captions'
-        ]
-    });
 
     if (data.k1 && data.k2) {
         player.configure({
@@ -40,15 +80,60 @@ async function loadShaka(data) {
 
     if (data.Auth) {
         player.getNetworkingEngine().registerRequestFilter((type, request) => {
-            request.headers['Authorization'] = data.Auth;
+            request.headers["Authorization"] = data.Auth;
         });
     }
 
     try {
         await player.load(data.url);
         showToast("Live Stream Started");
+
+        // Add PiP button after controls are created
+        setTimeout(addPiPButton, 500);
+
     } catch (e) {
         console.error("Shaka Load Error", e);
-        document.getElementById('errorOverlay').classList.add('show');
+        document.getElementById("errorOverlay").classList.add("show");
     }
 }
+
+function addPiPButton() {
+    if (!document.pictureInPictureEnabled) return;
+
+    if (document.getElementById("custom-pip-btn")) return;
+
+    const controls = document.querySelector(".shaka-controls-button-panel");
+    const video = document.getElementById("video");
+
+    if (!controls) return;
+
+    const btn = document.createElement("button");
+    btn.id = "custom-pip-btn";
+    btn.className = "shaka-overflow-button";
+    btn.title = "Picture in Picture";
+    btn.innerHTML = "📺";
+
+    btn.onclick = async () => {
+        try {
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+            } else {
+                await video.requestPictureInPicture();
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    // Insert before Fullscreen button
+    const fullscreenBtn = controls.querySelector(".shaka-fullscreen-button");
+
+    if (fullscreenBtn) {
+        controls.insertBefore(btn, fullscreenBtn);
+    } else {
+        controls.appendChild(btn);
+    }
+}
+
+document.addEventListener("shaka-ui-loaded", initApp);
+document.addEventListener("contextmenu", e => e.preventDefault());
